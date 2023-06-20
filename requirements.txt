@@ -1,0 +1,5 @@
+Flask==2.3.2
+SQLAlchemy
+flask_sqlalchemy==3.0.3
+Flask-Login
+

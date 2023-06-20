@@ -5,7 +5,7 @@ FROM python:3.9
 WORKDIR /app
 
 # Sao chép tất cả các tệp từ thư mục hiện tại vào thư mục /app trong container
-COPY . /app
+COPY . /app/
 
 # Cài đặt các phụ thuộc của ứng dụng
 RUN pip install --no-cache-dir -r requirements.txt
