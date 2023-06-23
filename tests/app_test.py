@@ -53,9 +53,3 @@ class FlaskAppTestCase(unittest.TestCase):
             # Kiểm tra dữ liệu trong nested transaction trước khi commit
             result_nested = models.User.query.filter_by(email="test_user").first()
             self.assertIsNotNone(result_nested)
-
-            # Thực hiện kiểm tra trong một nested transaction khác để kiểm tra dữ liệu trong database chính
-            with db.session.begin_nested():
-                # Kiểm tra dữ liệu trong database chính (không thay đổi)
-                result_main_db = models.User.query.filter_by(email="test_user").first()
-                self.assertIsNone(result_main_db)

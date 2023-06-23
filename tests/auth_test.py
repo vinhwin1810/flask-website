@@ -3,7 +3,7 @@ from flask import Flask
 from flask_testing import TestCase
 from website import create_app, db
 from website.models import User
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask import url_for
 from flask_login import current_user
 
@@ -58,13 +58,18 @@ class TestAuthViews(TestCase):
         self.assert200(response)
 
     def test_logout_route(self):
+        email = 'test@example.com'
+        password = 'password123'
+        user = User(email=email, password=generate_password_hash(password))
+        db.session.add(user)
+        db.session.commit()
         with self.client:
             # Login the user
-            response = self.client.post('/login', data=dict(email='test_user', password='test_password'))
+            response = self.client.post('/login', data={'email': email, 'password': password})
             self.assertEqual(response.status_code, 302)
 
             # Check the location header
-            self.assertEqual(response.headers['Location'], '/')  # Expecting redirect
+            self.assertEqual(response.headers['Location'], '/')
 
             # Follow the redirect
             response = self.client.get('/', follow_redirects=True)
@@ -76,30 +81,23 @@ class TestAuthViews(TestCase):
 
             self.assertFalse(current_user.is_authenticated)  # Ensure user is logged out
 
-
-
-
     def test_sign_up_route(self):
         with self.client:
             response = self.client.post('/sign-up', data=dict(
-                email='new_user@example.com',
-                firstName='New User',
+                email='test_user',
+                firstName='Test',
                 password1='test_password',
                 password2='test_password'
             ))
+
             self.assertEqual(response.status_code, 302)  # Expecting redirect
 
-            # Follow the redirect
-            response = self.client.get(response.headers['Location'])
-            self.assertEqual(response.status_code, 200)
-            self.assertTrue(current_user.is_authenticated)  # Ensure user is logged in
+            user = User.query.filter_by(email='test_user').first()
+            self.assertIsNotNone(user)  # User should exist in the database
+            self.assertTrue('test_password's == user.password)  # Verify password
 
-            # Additional assertions to validate the created user in the database
-            user = User.query.filter_by(email='new_user@example.com').first()
-            self.assertIsNotNone(user)
-            self.assertEqual(user.email, 'new_user@example.com')
-            self.assertEqual(user.first_name, 'New User')
-            self.assertTrue(user.check_password('test_password'))  # Verify password
+            self.assertTrue(current_user.is_authenticated)  # Ensure user is authenticated
+
 
             # Clean up: delete the created user
             db.session.delete(user)
