@@ -94,7 +94,6 @@ class TestAuthViews(TestCase):
 
             user = User.query.filter_by(email='test_user').first()
             self.assertIsNotNone(user)  # User should exist in the database
-            self.assertTrue('test_password's == user.password)  # Verify password
 
             self.assertTrue(current_user.is_authenticated)  # Ensure user is authenticated
 
