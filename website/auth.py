@@ -8,6 +8,7 @@ auth = Blueprint('auth', __name__)
 
 #need to ensure login can handle methods GET OR POST
 @auth.route('/login', methods=['GET', 'POST'])
+
 def login():
     if request.method == "POST":
         email = request.form.get('email')
@@ -59,7 +60,7 @@ def sign_up():
             new_user = User(email=email, first_name = first_name, password = generate_password_hash(password1, method='sha256')) #hashing algorithm
             db.session.add(new_user)
             db.session.commit() #update the db
-            login_user(user, remember=True) 
+            login_user(new_user, remember=True) 
             flash("Account created", category='success')
 
             return redirect(url_for('views.home')) #Blueprint and the function we want to go for
